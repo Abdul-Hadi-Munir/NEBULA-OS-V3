@@ -61,7 +61,6 @@ static const TaskInfo task_list[] = {
     {"./tasks/task_manager",  "Task Manager"},
     {"./tasks/music_player",  "Music Player"},
     {"./tasks/minigame",      "Minigame"},
-    {"./tasks/print_file",    "Print File"},
     {"./tasks/instruction_guide", "Instruction Guide"},
     {"./tasks/dice_roller",   "Dice Roller"},
     {"./tasks/rename_file",   "Rename File"},
@@ -114,7 +113,7 @@ void display_menu() {
 
     for (int i = 1; i <= 12; ++i) {
         printf("  [%2d] %-18s", i, task_list[i].display_name);
-        if (i + 12 <= 24) printf(" [%2d] %s", i + 12, task_list[i + 12].display_name);
+        if (i + 12 <= 23) printf(" [%2d] %s", i + 12, task_list[i + 12].display_name);
         printf("\n");
     }
 
@@ -179,7 +178,7 @@ void foreground_task(pid_t child_pid, const char* task_name, int is_new) {
 }
 
 void launch_task(int task_number) {
-    if (task_number < 1 || task_number > 24) return;
+    if (task_number < 1 || task_number > 23) return;
     const char* binary = task_list[task_number].binary;
     const char* task_name = task_list[task_number].display_name;
 
@@ -318,9 +317,16 @@ int main() {
                 while (fgets(line, sizeof(line), f)) printf("  %s", line);
                 fclose(f);
             }
-            printf("-------------------\n  Press Enter...");
+            printf("-------------------\n  [C] Clear Logs  [ENTER] Back\n  NebulaOS> ");
             fflush(stdout);
-            getchar();
+            char l_buf[16];
+            fgets(l_buf, 16, stdin);
+            if (l_buf[0] == 'c' || l_buf[0] == 'C') {
+                FILE* f2 = fopen(SYSTEM_LOG_PATH, "w");
+                if (f2) fclose(f2);
+                printf("  [System] Logs cleared.\n");
+                sleep(1);
+            }
         }
         else {
             int n = atoi(buffer);

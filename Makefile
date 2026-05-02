@@ -35,7 +35,6 @@ TASK_BINS = tasks/calculator \
             tasks/task_manager \
             tasks/music_player \
             tasks/minigame \
-            tasks/print_file \
             tasks/instruction_guide \
             tasks/dice_roller \
             tasks/text_search \
