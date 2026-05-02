@@ -1,94 +1,88 @@
 # NEBULA OS V3 🚀
-**A Minimalist High-Performance Operating System Simulator**
+**A Comprehensive Minimalist Operating System Simulation**
 
-NebulaOS V3 is a sophisticated CLI-based operating system simulator designed to demonstrate core OS concepts including multi-level queue scheduling, resource management, inter-process communication (IPC), and multitasking within a minimalist terminal environment.
-
----
-
-## 🌟 Key Features
-
-### 🧠 Advanced Kernel Architecture
-*   **Multi-Level Queue Scheduling:** 
-    *   **Q0 (Priority Queue):** Real-time and high-priority tasks.
-    *   **Q1 (Round Robin):** Balanced time-sharing for interactive applications.
-    *   **Q2 (FCFS):** Batch processing for background services.
-*   **Dynamic Resource Management:** Real-time tracking of RAM, HDD, and CPU cores.
-*   **Inter-Process Communication (IPC):** Robust messaging system using named pipes (FIFOs).
-*   **Deadlock Detection:** Automated monitoring to prevent resource starvation.
-
-### 💼 Integrated Productivity Suite (23 Built-in Tasks)
-*   **Professional Notepad:** Vim-style commands (`:w`, `:wq`), autosave, and large buffer support.
-*   **Enhanced Music Player:** MP3 playback support via `mpg123` with song selection from a local library.
-*   **System Tools:** Task Manager, Resource Monitor, Log Viewer, and Mini Terminal.
-*   **Productivity:** Calendar, Alarm/Reminder (with background daemon support), To-Do List, and Stopwatch.
-*   **File Management:** Create, Delete, Move, Copy, Rename, and File Info tools.
-*   **Games & Fun:** Number Guesser (Space Theme) and Comic-style Dice Roller.
-
-### 🛡️ System Integrity
-*   **Background Daemons:** Services like the Clock and Log Daemon run silently in the background.
-*   **Process Isolation:** Each task runs as an independent process with controlled resource allocation.
-*   **Minimalist UI:** High-quality, distraction-free terminal interface with box headers and consistent formatting.
+NebulaOS V3 is a high-fidelity operating system simulator implemented in C++17. It explores advanced systems programming concepts such as multi-level feedback queues, resource allocation protocols, inter-process communication, and process lifecycle management within a strictly minimalist CLI architecture.
 
 ---
 
-## 🛠️ Technical Stack
-*   **Language:** C++17
-*   **Concurrency:** POSIX Threads (pthreads)
-*   **Signals:** Unix Signal Handling (`SIGTSTP`, `SIGCONT`, `SIGUSR1`, etc.)
-*   **I/O:** Non-blocking terminal I/O using `select()` and `termios`.
-*   **Audio:** Integration with `mpg123` for MP3 playback.
+## 🏛️ Kernel Architecture Deep-Dive
+
+### 1. Multi-Level Queue (MLQ) Scheduler
+NebulaOS utilizes a tiered scheduling strategy to handle diverse workload profiles:
+*   **Queue 0 (High Priority):** Reserved for system-critical tasks and real-time alerts. It uses a preemptive priority-based approach.
+*   **Queue 1 (Round Robin):** Dedicated to interactive user applications (e.g., Notepad, Calculator). It uses a defined time-quantum to ensure responsive multitasking.
+*   **Queue 2 (FCFS):** Handles batch or background tasks where execution order is more critical than response time.
+
+### 2. Process Management & PCB
+Every task in NebulaOS is managed via a **Process Control Block (PCB)** which tracks:
+*   **PID:** Unique Process Identifier.
+*   **State:** (RUNNING, WAITING, STOPPED, TERMINATED).
+*   **Priority:** Dynamic priority level (0-10).
+*   **Resource Map:** Tracking RAM, HDD, and CPU cores allocated to the process.
+
+### 3. IPC & Signal Handling
+NebulaOS implements a custom **IPC Manager** using **POSIX Named Pipes (FIFOs)**:
+*   **Communication Protocol:** Tasks send resource requests and termination notices via `/tmp/nebula_pipe_[PID]`.
+*   **Kernel Signals:** Uses Unix signals for process control:
+    *   `SIGTSTP`: Minimizes a task to the background.
+    *   `SIGCONT`: Resumes a task to the foreground.
+    *   `SIGTERM`: Graceful termination.
+
+### 4. Resource & Memory Management
+The kernel maintains a global resource registry protected by **pthreads mutexes**:
+*   **Memory Bank:** Tracks fragmented memory blocks (simulated).
+*   **HDD Registry:** Manages virtual storage in the `nebula_hdd/` directory.
+*   **Core Allocation:** Prevents CPU over-subscription by blocking task launches if no cores are available.
 
 ---
 
-## 🚀 Getting Started
+## 📁 Detailed Task Suite
 
-### Prerequisites
-*   `g++` (C++17 support)
-*   `make`
-*   `mpg123` (for Music Player functionality)
+### 📄 Professional Notepad
+A production-grade text editor within the CLI.
+*   **Vim-Style Commands:** `:w` (save), `:q` (quit), `:wq` (save & exit).
+*   **Internal Buffering:** Supports up to 500 lines of text with thread-safe autosave.
+*   **Interface:** Clean line-numbering and status bar.
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Abdul-Hadi-Munir/NEBULA-OS-V3.git
-   cd NEBULA-OS-V3
-   ```
-2. Build the system:
-   ```bash
-   make
-   ```
+### 🎵 Advanced Music Player
+A real-time audio playback utility.
+*   **Backend:** Powered by `mpg123`.
+*   **Library:** Dynamic scanning of the `music/` directory for `.mp3` files.
+*   **Control:** Interactive menu for song selection and 'q' to stop playback.
 
-### Running the OS
-Launch the main kernel:
+### ⏰ Alarm & Background Daemons
+Demonstrates true OS background services.
+*   **Daemonization:** Uses double-forking to keep the alarm alive after the UI exits.
+*   **Notifications:** Triggers system beeps (`\a`) and logs events to the kernel.
+
+### 📊 System Utilities
+*   **Task Manager:** Real-time process monitoring with 'Kill' and 'Priority' controls.
+*   **Resource Monitor:** Accurate visualization of RAM/HDD usage via block-character graphs.
+*   **Log Viewer:** Live feed of kernel events with 'Clear' functionality.
+
+---
+
+## 🛠️ Technical Implementation
+*   **Concurrency:** Heavy use of `pthreads` for asynchronous IPC handling and background monitoring.
+*   **Synchronization:** Mutexes and Condition Variables (`pthread_cond_t`) ensure zero race conditions in the kernel.
+*   **Terminal Control:** `termios.h` is used to implement "Raw Mode" for instant keypress detection in the Clock and Games.
+
+---
+
+## 🚀 Execution & Deployment
+
+### Build Instructions
 ```bash
-./OS
-```
-Follow the on-screen prompts to configure your system resources (RAM, HDD, Cores) and start exploring the Nebula dashboard.
-
----
-
-## 📁 Project Structure
-```text
-NebulaOS/
-├── src/                # Core Source Code
-│   ├── kernel/         # OS Kernel (Scheduler, Memory, IPC)
-│   ├── tasks/          # Built-in Applications
-│   └── os.cpp          # Main Entry Point
-├── include/            # Header Files
-├── music/              # MP3 Library
-├── nebula_hdd/         # Virtual Hard Drive Storage
-├── Makefile            # Build System
-└── README.md           # Documentation
+make clean && make
 ```
 
+### Resource Configuration
+Upon launch (`./OS`), the user must specify:
+1.  **RAM:** Total system memory in GB.
+2.  **HDD:** Total virtual storage in GB.
+3.  **Cores:** Number of available CPU cores for multitasking.
+
 ---
 
-## 📜 Development Notes
-NebulaOS V3 prioritizes **Professionalism** and **Minimalism**. All code is written for high performance with zero unnecessary overhead. Emojis are used selectively in games and fun tools, while system utilities maintain a sleek, technical aesthetic.
-
----
-
-## 🤝 Contributing
-NebulaOS is an educational project. Feel free to fork, submit PRs, or report issues to help improve the simulation.
-
-**Developed by Abdul Hadi Munir**
+**Developed by Abdul Hadi Munir**  
+*NebulaOS V3: Engineering Minimalism.*
