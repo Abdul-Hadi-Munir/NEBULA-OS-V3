@@ -8,14 +8,17 @@
 #include <fcntl.h>
 #include "kernel/ipc_manager.h"
 
-void play_alarm_sound() {
-    // Attempt to beep and play a sound
-    for (int i = 0; i < 5; i++) {
+void trigger_alarm(const char* msg) {
+    // Beep multiple times
+    for (int i = 0; i < 3; i++) {
         printf("\a"); // System beep
         fflush(stdout);
-        system("mpg123 -q music/cosmic_vibes.mp3 --frames 100 > /dev/null 2>&1");
-        sleep(1);
+        usleep(300000);
     }
+    
+    // Print the reminder message prominently
+    printf("\n\n  🔔 [REMINDER] %s 🔔\n\n", msg);
+    fflush(stdout);
 }
 
 int main() {
@@ -40,7 +43,7 @@ int main() {
         fflush(stdout);
         char msg[128];
         if (!fgets(msg, 128, stdin)) strcpy(msg, "Wake up!");
-        msg[strlen(msg)-1] = '\0';
+        msg[strcspn(msg, "\n")] = 0; // Remove newline
 
         printf("\n  🔔 Alarm set for %d seconds from now.\n", seconds);
         printf("  [1] Keep open (Foreground)\n");
@@ -52,20 +55,21 @@ int main() {
         fgets(choice_buf, 16, stdin);
         
         if (choice_buf[0] == '2') {
-            printf("\n  [✔] Alarm daemonized! It will beep when time is up.\n");
-            printf("  You can now use other OS features.\n");
+            printf("\n  [✔] Alarm daemonized! It will beep and notify you.\n");
             sleep(1);
             
             pid_t pid = fork();
             if (pid == 0) {
                 // Background Daemon
                 setsid();
-                int devnull = open("/dev/null", O_WRONLY);
-                dup2(devnull, 0); // Still want to see beeps on main terminal if possible?
-                // Actually daemon shouldn't have terminal. 
-                // But we want it to beep.
                 sleep(seconds);
-                play_alarm_sound();
+                
+                // Open terminal for output
+                int tty = open("/dev/tty", O_WRONLY);
+                if (tty >= 0) {
+                    dprintf(tty, "\a\a\a\n\n  🔔 [NEBULA OS REMINDER] %s 🔔\n\n", msg);
+                    close(tty);
+                }
                 _exit(0);
             }
             // Parent exits UI
@@ -98,8 +102,7 @@ int main() {
             }
         }
         
-        printf("\n\n  🚨 ALARM!!! 🚨\n  Message: %s\n", msg);
-        play_alarm_sound();
+        trigger_alarm(msg);
     }
 
     printf("\n  Press Enter to exit...");
