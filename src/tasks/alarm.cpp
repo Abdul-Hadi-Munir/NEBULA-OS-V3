@@ -9,15 +9,16 @@
 #include "kernel/ipc_manager.h"
 
 void trigger_alarm(const char* msg) {
-    // Beep multiple times
+    // Strictly 3 beeps
     for (int i = 0; i < 3; i++) {
         printf("\a"); // System beep
         fflush(stdout);
-        usleep(300000);
+        system("echo -ne '\007' > /dev/tty 2>/dev/null"); 
+        usleep(500000); // 0.5s pause between beeps
     }
     
-    // Print the reminder message prominently
-    printf("\n\n  🔔 [REMINDER] %s 🔔\n\n", msg);
+    printf("\n\n  🔔  [NEBULA OS REMINDER]  🔔\n");
+    printf("  MESSAGE: %s\n\n", msg);
     fflush(stdout);
 }
 
@@ -43,7 +44,7 @@ int main() {
         fflush(stdout);
         char msg[128];
         if (!fgets(msg, 128, stdin)) strcpy(msg, "Wake up!");
-        msg[strcspn(msg, "\n")] = 0; // Remove newline
+        msg[strcspn(msg, "\n")] = 0; 
 
         printf("\n  🔔 Alarm set for %d seconds from now.\n", seconds);
         printf("  [1] Keep open (Foreground)\n");
@@ -55,7 +56,7 @@ int main() {
         fgets(choice_buf, 16, stdin);
         
         if (choice_buf[0] == '2') {
-            printf("\n  [✔] Alarm daemonized! It will beep and notify you.\n");
+            printf("\n  [✔] Alarm daemonized! It will beep 3 times when ready.\n");
             sleep(1);
             
             pid_t pid = fork();
@@ -67,12 +68,16 @@ int main() {
                 // Open terminal for output
                 int tty = open("/dev/tty", O_WRONLY);
                 if (tty >= 0) {
-                    dprintf(tty, "\a\a\a\n\n  🔔 [NEBULA OS REMINDER] %s 🔔\n\n", msg);
+                    dprintf(tty, "\a\a\a\n\n  🔔  [NEBULA OS REMINDER]  🔔\n");
+                    dprintf(tty, "  MESSAGE: %s\n\n", msg);
                     close(tty);
                 }
+                
+                // Strictly 3 beeps to /dev/tty
+                system("echo -ne '\007\007\007' > /dev/tty 2>/dev/null");
+                
                 _exit(0);
             }
-            // Parent exits UI
             send_termination_notice(getpid());
             return 0;
         }
