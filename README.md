@@ -1,136 +1,112 @@
 # NEBULA OS V3 🚀
-**A Comprehensive Professional Operating System Simulation**
+**A Comprehensive Minimalist Operating System Simulation**
 
 NebulaOS V3 is a high-fidelity operating system simulator implemented in C++17. It explores advanced systems programming concepts such as multi-level feedback queues, resource allocation protocols, inter-process communication, and process lifecycle management within a strictly minimalist CLI architecture.
 
 ---
 
-## 📖 Table of Contents
-1. [System Architecture](#-system-architecture)
-2. [Kernel Components](#-kernel-components)
-3. [The Professional Task Suite](#-the-professional-task-suite)
-4. [Deployment Guide](#-deployment-guide)
-5. [Usage Instructions](#-usage-instructions)
-6. [Troubleshooting & FAQ](#-troubleshooting--faq)
+## 🏛️ Kernel Architecture Deep-Dive
+
+### 1. Multi-Level Queue (MLQ) Scheduler
+NebulaOS utilizes a tiered scheduling strategy to handle diverse workload profiles:
+*   **Queue 0 (High Priority):** Reserved for system-critical tasks and real-time alerts. It uses a preemptive priority-based approach.
+*   **Queue 1 (Round Robin):** Dedicated to interactive user applications (e.g., Notepad, Calculator). It uses a defined time-quantum to ensure responsive multitasking.
+*   **Queue 2 (FCFS):** Handles batch or background tasks where execution order is more critical than response time.
+
+### 2. Process Management & PCB
+Every task in NebulaOS is managed via a **Process Control Block (PCB)** which tracks:
+*   **PID:** Unique Process Identifier.
+*   **State:** (RUNNING, WAITING, STOPPED, TERMINATED).
+*   **Priority:** Dynamic priority level (0-10).
+*   **Resource Map:** Tracking RAM, HDD, and CPU cores allocated to the process.
+
+### 3. IPC & Signal Handling
+NebulaOS implements a custom **IPC Manager** using **POSIX Named Pipes (FIFOs)**:
+*   **Communication Protocol:** Tasks send resource requests and termination notices via `/tmp/nebula_pipe_[PID]`.
+*   **Kernel Signals:** Uses Unix signals for process control:
+    *   `SIGTSTP`: Minimizes a task to the background (triggered via Ctrl+Z).
+    *   `SIGCONT`: Resumes a task to the foreground.
+    *   `SIGTERM`: Graceful termination.
 
 ---
 
-## 🏛️ System Architecture
+## 🚀 Deployment & Installation Guide
 
-NebulaOS operates on a **Micro-Kernel Inspired** architecture where the core OS handles scheduling and resource management, while all applications (tasks) run in isolated user-space processes.
+Follow these steps to deploy NebulaOS V3 on your local Linux environment:
 
-### Kernel Layers:
-*   **Hardware Abstraction (Simulated):** Manages virtual RAM and HDD resources.
-*   **Process Management:** Tracks every task via a **Process Control Block (PCB)**.
-*   **Scheduler:** A three-tier **Multi-Level Queue (MLQ)** system.
-*   **IPC Bridge:** Uses **Named Pipes** for bidirectional communication between the Kernel and Tasks.
-
----
-
-## 🧠 Kernel Components
-
-### 1. The MLQ Scheduler
-The scheduler manages tasks based on their behavior and priority:
-*   **Queue 0 (Priority):** For real-time tasks. If a task is in Q0, it is executed immediately.
-*   **Queue 1 (Round Robin):** For interactive apps. Each task gets a "Time Slice". If it doesn't finish, it moves to the back of the line.
-*   **Queue 2 (FCFS):** For background batch tasks. First come, first served.
-
-### 2. Resource Guard
-NebulaOS prevents "System Crashes" by strictly enforcing resource limits:
-*   When you launch a task, it sends a **Resource Request** (e.g., "I need 64MB RAM").
-*   The Kernel checks if `free_RAM >= request`. If not, the task waits in the **Ready Queue**.
-*   This ensures the OS never "runs out" of memory unexpectedly.
-
----
-
-## 📁 The Professional Task Suite
-
-### 📄 Notepad (Pro Editor)
-*   **How to use:** Type your text normally.
-*   **Commands:**
-    *   `:w` - Saves the file to `nebula_hdd/`.
-    *   `:q` - Quits the editor (auto-saves).
-    *   `:wq` - Save and Quit.
-    *   `:help` - View all commands.
-
-### 🎵 Music Player (MP3 Support)
-*   **How to use:** Select a song number from the generated list.
-*   **Tech:** Uses `mpg123` for high-quality audio.
-*   **Control:** Press `q` while a song is playing to stop it and return to the menu.
-
-### ⏰ Alarm & Daemon
-*   **Backgrounding:** You can set an alarm and choose "Run in background". This forks a **Daemon Process** that stays alive even if you exit the Alarm app!
-*   **Notification:** It will beep (`\a`) and play a sound when the timer expires.
-
----
-
-## 🚀 Deployment Guide
-
-Follow these steps to deploy NebulaOS V3 on your local machine:
-
-### 1. Environment Setup
-Ensure you have the necessary tools installed:
+### 1. Environment Preparation
+Ensure your system has the necessary build tools and libraries installed:
 ```bash
-# Ubuntu/Debian
+# Update your package manager
 sudo apt update
-sudo apt install g++ make mpg123 curl
+
+# Install build-essential (includes g++ and make)
+sudo apt install build-essential
+
+# Install mpg123 (required for the Music Player)
+sudo apt install mpg123
 ```
 
 ### 2. Cloning & Compilation
+Clone the repository and build the binaries using the provided Makefile:
 ```bash
 # Clone the repository
 git clone https://github.com/Abdul-Hadi-Munir/NEBULA-OS-V3.git
 cd NEBULA-OS-V3
 
-# Clean old builds and compile
+# Clean previous builds and compile
 make clean
 make
 ```
 
-### 3. Folder Preparation
-NebulaOS requires specific folders to function:
-*   `music/`: Place your `.mp3` files here.
-*   `nebula_hdd/`: This is where your virtual files are saved.
-*(Note: These are created automatically on the first run or by the setup script)*
+### 3. Initial Configuration
+When you launch the OS for the first time (`./OS`), you will enter the **Configuration Phase**:
+*   **RAM (GB):** Total physical memory you want to simulate (e.g., `4`).
+*   **HDD (GB):** Virtual storage capacity (e.g., `100`).
+*   **Cores:** Number of CPU cores for the scheduler (e.g., `4`).
 
 ---
 
-## 🎮 Usage Instructions
+## 🖥️ Operating Workflow
 
-### Starting the OS
-Run the main binary:
+### Launching the Kernel
 ```bash
 ./OS
 ```
 
-### Configuration
-On startup, you will be asked for:
-1.  **RAM (GB):** Recommended 1-4 GB.
-2.  **HDD (GB):** Recommended 5-20 GB.
-3.  **Cores:** Recommended 2-8.
-
-### Controls
-*   **Numbers (1-23):** Launches a specific task.
-*   **M:** Shows all running background/minimized tasks.
-*   **F:** Bring a minimized task back to the foreground (requires PID).
-*   **L:** View System Logs (Press 'C' to clear logs).
-*   **Ctrl+Z:** Minimizes the current task to the background.
-*   **0:** Graceful Shutdown.
+### Navigating the Dashboard
+Once the boot sequence is complete, you will see the **Nebula Dashboard**:
+*   **Running a Task:** Simply enter the task number (1-23). The screen will clear, and the task will take the foreground.
+*   **Multitasking (Minimize):** While in a task, press **Ctrl+Z**. The kernel will catch the signal, suspend the task, and return you to the dashboard.
+*   **Managing Background Tasks:** 
+    *   Press **[M]** to view all background/minimized tasks.
+    *   Press **[F]** and enter a PID to bring a specific task back to the foreground.
+*   **System Logs:** Press **[L]** to view real-time kernel logs. Press **[C]** inside the log viewer to clear the history.
 
 ---
 
-## ❓ Troubleshooting & FAQ
+## 📁 Detailed Task Suite
 
-**Q: Music player isn't playing sound.**  
-**A:** Ensure `mpg123` is installed on your system. Check if your `.mp3` files are in the `music/` folder.
+### 📄 Professional Notepad
+*   **Features:** Vim-style commands, internal 500-line buffer, and thread-safe autosave.
+*   **Usage:** Type `:w` to save, `:q` to quit, and `:help` for a list of commands.
 
-**Q: Task fails to launch.**  
-**A:** Check the `L` (Logs) section. It's likely that the task requested more RAM than you have available. Close other tasks to free up memory.
+### 🎵 Advanced Music Player
+*   **Features:** Real MP3 playback via `mpg123`.
+*   **Usage:** Scans the `music/` folder automatically. Select a song by number.
 
-**Q: How do I add my own songs?**  
-**A:** Just drop any `.mp3` file into the `music/` directory. The Music Player will automatically detect it on the next launch.
+### ⏰ Alarm & Background Daemons
+*   **Features:** Double-forked background execution.
+*   **Usage:** Set an alarm and choose "Run in background". The OS will beep and notify you even after you exit the app.
+
+---
+
+## 🛠️ Troubleshooting
+*   **Permission Denied:** Ensure you have write permissions for `/tmp/` and the project directory.
+*   **Audio Issues:** Verify `mpg123` is installed. Run `which mpg123` to check the path.
+*   **Build Errors:** Ensure you are using `g++` with C++17 support (`g++ --version` should be 7.0 or higher).
 
 ---
 
 **Developed by Abdul Hadi Munir**  
-*NebulaOS V3: The Future of Minimalist Computing.*
+*NebulaOS V3: Engineering Minimalism.*
