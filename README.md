@@ -108,5 +108,8 @@ Once the boot sequence is complete, you will see the **Nebula Dashboard**:
 
 ---
 
-**Developed by Abdul Hadi Munir**  
 *NebulaOS V3: Engineering Minimalism.*
+
+
+
+
