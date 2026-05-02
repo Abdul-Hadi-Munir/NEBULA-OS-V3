@@ -13,9 +13,9 @@ int main() {
     system("clear");
 
     printf("╔═══════════════════════════════════════════════════════════╗\n");
-    printf("║                   NEBULA OS NUMBER GUESSER                ║\n");
+    printf("║                🚀 NEBULA OS: SPACE GUESSER 🛸             ║\n");
     printf("╚═══════════════════════════════════════════════════════════╝\n");
-    printf("  (Press 'q' at any time to quit | Press Ctrl+Z to minimize)\n\n");
+    printf("  (Press 'q' to quit | Press Ctrl+Z to minimize)\n\n");
 
     int playing = 1;
     while (playing) {
@@ -23,11 +23,11 @@ int main() {
         int guesses = 7;
         int won = 0;
 
-        printf("  [ New Game ] I'm thinking of a number between 1 and 100.\n");
-        printf("  You have %d attempts. Good luck!\n\n", guesses);
+        printf("  👾 [NEW GAME] I'm thinking of a number (1-100).\n");
+        printf("  🎯 You have %d attempts. Can you beat the alien? 👽\n\n", guesses);
 
         for (int i = 1; i <= guesses; i++) {
-            printf("  Attempt #%d - Enter your guess: ", i);
+            printf("  [Attempt #%d] 📝 Your guess: ", i);
             fflush(stdout);
             
             char buf[16];
@@ -40,32 +40,32 @@ int main() {
 
             int g = atoi(buf);
             if (g <= 0) {
-                printf("  [!] Please enter a valid number.\n");
+                printf("  ⚠  Whoops! That's not a valid number! 🛑\n");
                 i--; continue;
             }
 
             if (g == secret) {
-                printf("\n  ✨ CORRECT! The number was %d. You won in %d tries! ✨\n", secret, i);
+                printf("\n  ✨ BOOM! ✨ The number was %d. You're a Space Legend! 👑\n", secret);
                 won = 1;
                 break;
             } else if (g < secret) {
-                printf("  [↑] Too low!\n");
+                printf("  📈 HIGHER! (Too low...) ☁\n");
             } else {
-                printf("  [↓] Too high!\n");
+                printf("  📉 LOWER! (Too high...) 🔥\n");
             }
         }
 
         if (!playing) break;
-        if (!won) printf("\n  [✘] Game over. The secret number was %d.\n", secret);
+        if (!won) printf("\n  💥 KABOOM! Game over. The secret was %d. 🛸 Escaped!\n", secret);
 
-        printf("\n  Play again? (y/n): ");
+        printf("\n  🔄 Play another round? (y/n): ");
         fflush(stdout);
         char buf[16];
         if (!fgets(buf, 16, stdin) || (buf[0] != 'y' && buf[0] != 'Y')) playing = 0;
         if (playing) system("clear");
     }
 
-    printf("\n  Thanks for playing Nebula Guess! Goodbye.\n");
+    printf("\n  👋 See you next time, Space Cowboy! 🤠\n");
     send_termination_notice(getpid());
     return 0;
 }
