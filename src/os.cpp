@@ -324,7 +324,10 @@ int main() {
         }
         else {
             int n = atoi(buffer);
-            if (n > 0) launch_task(n);
+            if (n > 0) {
+                clear_screen();
+                launch_task(n);
+            }
         }
     }
 
