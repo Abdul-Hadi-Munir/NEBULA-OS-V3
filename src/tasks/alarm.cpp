@@ -8,18 +8,37 @@
 #include <fcntl.h>
 #include "kernel/ipc_manager.h"
 
-void trigger_alarm(const char* msg) {
-    // Strictly 3 beeps
+void trigger_alarm_notification(int tty_fd, const char* msg) {
+    // 3 Loud Beeps
     for (int i = 0; i < 3; i++) {
-        printf("\a"); // System beep
-        fflush(stdout);
-        system("echo -ne '\007' > /dev/tty 2>/dev/null"); 
-        usleep(500000); // 0.5s pause between beeps
+        if (tty_fd >= 0) {
+            dprintf(tty_fd, "\a");
+            system("echo -ne '\007' > /dev/tty 2>/dev/null");
+        } else {
+            printf("\a");
+            fflush(stdout);
+        }
+        usleep(500000);
     }
+
+    // High-visibility Banner
+    const char* banner = 
+        "\n\n  ################################################\n"
+        "  #                                              #\n"
+        "  #   🔔  NEBULA OS SYSTEM REMINDER  🔔          #\n"
+        "  #                                              #\n"
+        "  ################################################\n";
     
-    printf("\n\n  🔔  [NEBULA OS REMINDER]  🔔\n");
-    printf("  MESSAGE: %s\n\n", msg);
-    fflush(stdout);
+    if (tty_fd >= 0) {
+        dprintf(tty_fd, "%s", banner);
+        dprintf(tty_fd, "  MESSAGE: %s\n", msg);
+        dprintf(tty_fd, "  ################################################\n\n");
+    } else {
+        printf("%s", banner);
+        printf("  MESSAGE: %s\n", msg);
+        printf("  ################################################\n\n");
+        fflush(stdout);
+    }
 }
 
 int main() {
@@ -61,20 +80,15 @@ int main() {
             
             pid_t pid = fork();
             if (pid == 0) {
-                // Background Daemon
                 setsid();
+                // Close standard streams to be a proper daemon
+                close(0); close(1); close(2);
+                
                 sleep(seconds);
                 
-                // Open terminal for output
                 int tty = open("/dev/tty", O_WRONLY);
-                if (tty >= 0) {
-                    dprintf(tty, "\a\a\a\n\n  🔔  [NEBULA OS REMINDER]  🔔\n");
-                    dprintf(tty, "  MESSAGE: %s\n\n", msg);
-                    close(tty);
-                }
-                
-                // Strictly 3 beeps to /dev/tty
-                system("echo -ne '\007\007\007' > /dev/tty 2>/dev/null");
+                trigger_alarm_notification(tty, msg);
+                if (tty >= 0) close(tty);
                 
                 _exit(0);
             }
@@ -107,7 +121,7 @@ int main() {
             }
         }
         
-        trigger_alarm(msg);
+        trigger_alarm_notification(-1, msg);
     }
 
     printf("\n  Press Enter to exit...");
