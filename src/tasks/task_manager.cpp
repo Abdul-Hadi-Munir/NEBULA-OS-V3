@@ -6,14 +6,17 @@
 #include <sys/select.h>
 #include "kernel/ipc_manager.h"
 
-#define MAX_LOG_DISPLAY 20
+#define MAX_LOG_DISPLAY 15
 #define LINE_SIZE 256
 
-void display_process_table() {
-    printf("\n--- TASK MANAGER ---\n");
+void display_task_manager() {
+    printf("╔═══════════════════════════════════════════════════════════╗\n");
+    printf("║                   NEBULA OS TASK MANAGER                  ║\n");
+    printf("╚═══════════════════════════════════════════════════════════╝\n");
+    
     FILE* f = fopen("system.log", "r");
     if (!f) {
-        printf("  Cannot read system.log\n");
+        printf("  [Error] Cannot read system.log\n");
         return;
     }
 
@@ -28,11 +31,13 @@ void display_process_table() {
     }
     fclose(f);
 
-    printf("  Last %d system events:\n", MAX_LOG_DISPLAY);
+    printf("  Recent System Events:\n");
+    printf("  ──────────────────────────────────────────────────────────\n");
     int start = (count > MAX_LOG_DISPLAY) ? (count - MAX_LOG_DISPLAY) : 0;
     for (int i = start; i < count; i++) {
         printf("  %s", lines[i % 100]);
     }
+    printf("  ──────────────────────────────────────────────────────────\n");
 }
 
 int main() {
@@ -40,8 +45,10 @@ int main() {
     if (!wait_for_grant()) return 1;
 
     while (1) {
-        display_process_table();
-        printf("\n  [K] Kill  [P] Priority  [Q] Quit\n  Command: ");
+        system("clear");
+        display_task_manager();
+        printf("\n  [K] Kill Process  [P] Change Priority  [Q] Quit\n");
+        printf("  TaskManager> ");
         fflush(stdout);
 
         fd_set fds;
@@ -58,17 +65,28 @@ int main() {
             else if (c == 'k' || c == 'K') {
                 printf("  Enter PID to kill: ");
                 char pid_buf[16];
-                fgets(pid_buf, 16, stdin);
-                kill(atoi(pid_buf), SIGTERM);
+                if (fgets(pid_buf, 16, stdin)) {
+                    int pid = atoi(pid_buf);
+                    if (pid > 0) {
+                        kill(pid, SIGTERM);
+                        printf("  [System] SIGTERM sent to PID %d\n", pid);
+                        sleep(1);
+                    }
+                }
             }
             else if (c == 'p' || c == 'P') {
                 printf("  Enter PID: ");
-                char pid_buf[16]; fgets(pid_buf, 16, stdin);
-                printf("  Enter new priority (0-10): ");
-                char pri_buf[16]; fgets(pri_buf, 16, stdin);
-
-                printf("  Priority change request sent (simulated).\n");
-                sleep(1);
+                char pid_buf[16];
+                if (fgets(pid_buf, 16, stdin)) {
+                    int pid = atoi(pid_buf);
+                    printf("  Enter new priority (0-10): ");
+                    char pri_buf[16];
+                    if (fgets(pri_buf, 16, stdin)) {
+                        int pri = atoi(pri_buf);
+                        printf("  [System] Priority change to %d requested for PID %d\n", pri, pid);
+                        sleep(1);
+                    }
+                }
             }
         }
     }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <string.h>
 #include "kernel/ipc_manager.h"
 
 int is_leap(int y) {
@@ -27,26 +28,28 @@ int get_start_day(int m, int y) {
 void display_calendar(int m, int y) {
     const char* months[] = {"", "January", "February", "March", "April", "May", "June", 
                             "July", "August", "September", "October", "November", "December"};
-    printf("\n  -- %s %d --\n", months[m], y);
-    printf("  Su Mo Tu We Th Fr Sa\n");
+    
+    printf("╔═══════════════════════════════════════════════════════════╗\n");
+    printf("║                   NEBULA OS SYSTEM CALENDAR               ║\n");
+    printf("╚═══════════════════════════════════════════════════════════╝\n");
+    printf("  [ %s %d ]\n\n", months[m], y);
+    printf("  Su  Mo  Tu  We  Th  Fr  Sa\n");
+    printf("  ──────────────────────────\n  ");
 
     int start = get_start_day(m, y);
     int total = get_days_in_month(m, y);
 
-    for (int i = 0; i < start; i++) printf("   ");
+    for (int i = 0; i < start; i++) printf("    ");
     for (int d = 1; d <= total; d++) {
-        printf("%2d ", d);
+        printf("%2d  ", d);
         if ((start + d) % 7 == 0) printf("\n  ");
     }
-    printf("\n");
+    printf("\n  ──────────────────────────\n");
 }
 
 int main() {
     send_resource_request("Calendar", 25, 2);
     if (!wait_for_grant()) return 1;
-
-    printf("\n--- NEBULA OS CALENDAR ---\n");
-    printf("  (Press Ctrl+Z to Minimize)\n\n");
 
     time_t now = time(NULL);
     struct tm* cur = localtime(&now);
@@ -54,9 +57,12 @@ int main() {
     int y = cur->tm_year + 1900;
 
     while (1) {
+        system("clear");
         display_calendar(m, y);
-        printf("\n  [N]ext [P]rev [Q]uit: ");
+        printf("\n  [N] Next Month  [P] Prev Month  [Q] Quit\n");
+        printf("  Calendar> ");
         fflush(stdout);
+        
         char buf[16];
         if (!fgets(buf, 16, stdin)) break;
         char c = buf[0];
