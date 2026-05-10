@@ -28,12 +28,3 @@ To request permission, contact:
 
 The Software is owned and copyrighted by the copyright holder.  
 All title and intellectual property rights in the Software remain with the copyright holder.
-
-### 4. No Warranty
-
-The Software is provided **“AS IS”**, without warranty of any kind.  
-In no event shall the copyright holder be held liable for any damages arising from the use of this Software.
-
-### 5. Enforcement
-
-Any unauthorized use, reproduction, or distribution of the Software may result in legal action.
